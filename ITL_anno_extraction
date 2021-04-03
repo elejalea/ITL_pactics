@@ -1,0 +1,31 @@
+import xml.etree.ElementTree as ET
+
+filename = 'D:\\uusi_kansio\\glossed_texts.xml'
+
+my_dict = dict()
+keys = []
+values = []
+
+def xml_to_csv(filename, filename_out):
+    tree = ET.parse(filename)
+    root = tree.getroot()
+    for lemma in root.findall(".//words/word"):
+        for stem in lemma.findall(".//morphemes/morph[@type='root']/item[@type='txt']"):
+            STEM = stem.text
+            for gloss in lemma.findall(".//morphemes/morph"):
+                if gloss.attrib['type'] in ['circumfix', 'prefix', 'suffix', 'enclitic']:
+                    GLOSS = gloss.find("item[@type='gls']").text
+                elif gloss.attrib['type'] in ['root']:
+                    GLOSS = gloss.find("item[@type='msa']").text
+                else:
+                    GLOSS = ''
+                wordform = lemma.find("item[@type='txt']").text
+                if wordform in my_dict:
+                    my_dict[wordform]['glosses'].add(GLOSS)
+                else:
+                    my_dict[wordform] = dict()
+                    my_dict[wordform]['stem'] = STEM
+                    my_dict[wordform]['glosses'] = {GLOSS}
+                print(my_dict)
+
+xml_to_csv(filename)
